@@ -1,0 +1,46 @@
+{
+  "name": "mir-kino",
+  "version": "0.0.1",
+  "description": "Сайт по поиску фильмов просмотри информации о фильме актерах просмотра трейлеров",
+  "productName": "Мир кино",
+  "author": "Konst <blurbinfacebook@yandex.ru>",
+  "private": true,
+  "scripts": {
+    "dev": "quasar dev",
+    "build": "quasar build",
+    "buildandroid": "quasar build -m android",
+    "androiddev": "quasar dev -m cordova -T android",
+    "androidide": "quasar dev -m android --ide",
+    "test": "echo \"No test specified\" && exit 0"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.0.0",
+    "axios": "^0.21.1",
+    "core-js": "^3.6.5",
+    "dotenv": "^10.0.0",
+    "quasar": "^2.0.0",
+    "vuex": "^4.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.17.8",
+    "@quasar/app": "^3.0.0",
+    "babel-loader": "^8.2.4",
+    "vue-loader": "^16.8.3"
+  },
+  "browserslist": [
+    "last 10 Chrome versions",
+    "last 10 Firefox versions",
+    "last 4 Edge versions",
+    "last 7 Safari versions",
+    "last 8 Android versions",
+    "last 8 ChromeAndroid versions",
+    "last 8 FirefoxAndroid versions",
+    "last 10 iOS versions",
+    "last 5 Opera versions"
+  ],
+  "engines": {
+    "node": ">= 12.22.1",
+    "npm": ">= 6.13.4",
+    "yarn": ">= 1.21.1"
+  }
+}

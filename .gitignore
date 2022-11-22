@@ -1,0 +1,14 @@
+.DS_Store
+.thumbs.db
+/node_modules
+.quasar
+/dist
+/src-cordova
+npm-debug.log
+.idea
+/backend/package-lock.json
+/backend/node_modules
+/backend/.env
+/.vscode
+/backend/config/firebaseConfig.js
+package-lock.json
