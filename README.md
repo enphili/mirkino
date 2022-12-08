@@ -1,10 +1,10 @@
 # Мир кино
 
-### _Сайт по поиску фильмов и сериалов. Просмотра информации о фильмах и актерах._
+### _Сайт по поиску фильмов и сериалов. Просмотра информации о фильмах и актерах_
 
 [![](https://mirkino.devflweb.ru/icons/favicon-32x32.png)](https://mirkino.devflweb.ru "Перейти на сайт")
 
-![k](https://mirkino.devflweb.ru/mirkinodemo.gif)
+![](https://mirkino.devflweb.ru/mirkinodemo.gif)
 
 ## Функции
 
