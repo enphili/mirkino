@@ -4,8 +4,6 @@
 
 [![](https://mirkino.devflweb.ru/icons/favicon-32x32.png)](https://mirkino.devflweb.ru "Перейти на сайт")
 
-![](https://mirkino.devflweb.ru/mirkinodemo.gif)
-
 ![mirkinodemo](https://user-images.githubusercontent.com/41166090/206558188-e3156dfe-75b5-4297-84ac-3e75ebbb439d.gif)
 
 ## Функции
