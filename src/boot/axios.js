@@ -2,8 +2,8 @@ import { boot } from 'quasar/wrappers'
 import axios from 'axios'
 
 const baseURL = () => {
+  if (process.env.PROD) return `https://mir-kino.webfldev.ru`
   if (process.env.DEV) return `http://localhost:3000`
-  if (process.env.PROD) return `https://mirkino.devflweb.ru`
 }
 
 const api = axios.create({

@@ -6,7 +6,7 @@
   "author": "Konst <blurbinfacebook@yandex.ru>",
   "private": true,
   "scripts": {
-    "dev": "quasar dev",
+    "dev": "set NODE_OPTIONS=--openssl-legacy-provider && quasar dev",
     "build": "quasar build",
     "buildandroid": "quasar build -m android",
     "androiddev": "quasar dev -m cordova -T android",
@@ -25,7 +25,8 @@
     "@babel/core": "^7.17.8",
     "@quasar/app": "^3.0.0",
     "babel-loader": "^8.2.4",
-    "vue-loader": "^16.8.3"
+    "vue-loader": "^16.8.3",
+    "workbox-webpack-plugin": "^6.5.4"
   },
   "browserslist": [
     "last 10 Chrome versions",

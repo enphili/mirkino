@@ -16,6 +16,7 @@ firebase.initializeApp(firebaseConfig)
 
 const app = express()
 const HOSTNAME = 'localhost'
+// const HOSTNAME = '192.168.0.4'
 const PORT = process.env.PORT ?? 3000
 
 app.use(middlewares.responseHeaders)
