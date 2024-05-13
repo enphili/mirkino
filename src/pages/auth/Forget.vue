@@ -67,7 +67,7 @@ export default {
         })
       } else {
         try {
-          const response = await api.post('/api/forget', {email: email.value})
+          const response = await api.post('/apifb/forget', {email: email.value})
           if (response.status === 200) {
             await router.push('/login')
           }

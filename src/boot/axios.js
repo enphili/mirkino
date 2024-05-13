@@ -3,7 +3,7 @@ import axios from 'axios'
 
 const baseURL = () => {
   if (process.env.PROD) return `https://mir-kino.webfldev.ru`
-  if (process.env.DEV) return `http://localhost:3000`
+  if (process.env.DEV) return `http://localhost:3001`
 }
 
 const api = axios.create({
@@ -11,13 +11,13 @@ const api = axios.create({
 })
 
 export default boot(({ app }) => {
-  // for use inside Vue files (Options API) through this.$axios and this.$backend
+  // for use inside Vue files (Options API) through this.$axios and this.$backend-B
 
   app.config.globalProperties.$axios = axios
   // this will allow you to use this.$axios
 
   app.config.globalProperties.$api = api
-  // this will allow you to use this.$backend
+  // this will allow you to use this.$backend-B
 })
 
 export { api }

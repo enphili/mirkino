@@ -168,7 +168,7 @@ export default {
         })
       } else {
         try {
-          const res = await api.post('/api/registry', {...formData.value})
+          const res = await api.post('/apifb/registry', {...formData.value})
           $store.commit('currentUser/userData', res.data)
           $q.notify({
             color: 'green-4',

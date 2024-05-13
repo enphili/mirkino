@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const api = require('axios').create({baseURL: 'https://api.themoviedb.org/3'})
 
+
 router.get('/api/trendingfilms',  async (req, res, next) => {
   try {
     const url = `/trending/all/week?language=ru&api_key=${process.env.TMDB_API_KEY}&page=${req.query.page}`
