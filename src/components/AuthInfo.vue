@@ -51,7 +51,7 @@ export default {
 
     const logout = async () => {
       try {
-        await api.get('/api/logout') // выход из firebase
+        await api.get('/apifb/logout') // выход из firebase
         $store.commit('currentUser/logout') // обнуление state и очистка localstorage
         getUserData() // замена никнейма на - 'гость'
         $q.notify({

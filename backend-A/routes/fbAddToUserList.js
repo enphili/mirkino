@@ -5,7 +5,7 @@ require('firebase/auth')
 require('firebase/database')
 
 
-router.post(`/api/addtouserlist`, async (req, res, next) => {
+router.post(`/apifb/addtouserlist`, async (req, res, next) => {
   const {mediaData, key, keyStamp} = req.body
   mediaData['keyStamp'] = keyStamp
   try {
