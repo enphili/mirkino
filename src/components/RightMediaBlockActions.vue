@@ -12,7 +12,7 @@
         flat
         color="accent"
         icon="bookmark_add"
-        class="wish-btn"
+        class="user-control-btn"
         :disable="isInWishList"
         :label="!isInWishList ? 'Буду смотреть' : 'В списке желаний'"
         @click="addToWishList"
@@ -22,7 +22,7 @@
         size="sm"
         unelevated
         icon="bookmark_remove"
-        class="wish-btn"
+        class="user-control-btn"
         :disable="!isInWishList"
         label="Уже посмотрел"
         @click="removeFromWishList"
@@ -37,7 +37,7 @@
         flat
         color="red-7"
         icon="ion-heart"
-        class="wish-btn"
+        class="user-control-btn"
         :disable="isInFavoriteList"
         :label="!isInFavoriteList ? 'В мои любимые' : 'В списке любимых'"
         @click="addToFavoriteList"
@@ -47,7 +47,7 @@
         size="sm"
         unelevated
         icon="ion-heart-dislike"
-        class="wish-btn"
+        class="user-control-btn"
         :disable="!isInFavoriteList"
         label="Разонравился"
         @click="removeFromFavoriteList"
@@ -124,8 +124,6 @@ export default {
 </script>
 
 <style scoped lang="sass">
-.wish-btn
-  width: 159px
 .short-description-title
   margin: 0 0 5px 0
 .web-search-btn

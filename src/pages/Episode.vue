@@ -128,12 +128,13 @@ export default {
   setup(props) {
     const $q = useQuasar()
     const router = useRouter()
-    const metaDescription = ref('Страница с информацией об одной из серии сериала')
+    const metaDescription = 'Страница с информацией об одной из серии сериала'
     const index = ref(null)
+    const showScrollUpBtn = ref(false)
+
     const episodeData = reactive({})
     const chosenEpisodeNumber = ref(props.episodeNumber)
     const chosenEpisodTitle = ref(props.episodTitle)
-    const showScrollUpBtn = ref(false)
     const mediaDataShotCut = reactive({})
     const basePosterURL = useGetPosterUrl('https://image.tmdb.org/t/p/w500')
 
@@ -173,8 +174,8 @@ export default {
         mediaDataShotCut.episodTitle = response.data.name || response.data.original_name
         mediaDataShotCut.posterPath = basePosterURL(response.data.still_path)
         mediaDataShotCut.year = useDividedReleaseDate(response.data.air_date)
-        mediaDataShotCut.seasonNumber = 'Сезон ' + props.seasonNumber
-        mediaDataShotCut.episodeNumber = 'Серия ' + response.data.episode_number
+        mediaDataShotCut.seasonNumber = `Сезон ${props.seasonNumber}`
+        mediaDataShotCut.episodeNumber = `Серия ${response.data.episode_number}`
       }
       catch (error) {
         $q.notify({

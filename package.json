@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "set NODE_OPTIONS=--openssl-legacy-provider && quasar dev",
     "build": "quasar build",
+    "buildpwa": "quasar build -m pwa",
     "buildandroid": "quasar build -m android",
     "androiddev": "quasar dev -m cordova -T android",
     "androidide": "quasar dev -m android --ide",

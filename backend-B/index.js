@@ -4,12 +4,15 @@ const cors = require('cors')
 const tmdbMediaData = require('./routes/tmdbMediaData.js')
 const { handleError } = require('./helpers/errorHandler.js')
 
-
 const app = express()
-const HOSTNAME = '127.0.0.1'
+const HOSTNAME = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1'
 const PORT = process.env.PORT ?? 3050
 
-app.use(cors())
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' ? 'https://mir-kino.webfldev.ru' : 'http://localhost:3001'
+}
+
+app.use(cors(corsOptions))
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(tmdbMediaData)

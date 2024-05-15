@@ -19,7 +19,7 @@ const errorsCode = {
   'auth/user-not-found': 'Пользователь не найден',
   'auth/wrong-password': 'Недействительный пароль для данной учетной записи',
   'auth/invalid-continue-uri': 'В продолжении URL отсутствует домен.',
-  'ECONNREFUSED': 'Проверте настройки серверов'
+  'ECONNREFUSED': 'Проверьте настройки серверов'
 }
 
 export default code => errorsCode[code] ? errorsCode[code] : 'Возникла неизвестная ошибка! Попробуйте позже.'
