@@ -100,7 +100,7 @@ export default {
         })
       } else {
         try {
-          const response = await api.post('/api/login', {email: email.value, password: password.value})
+          const response = await api.post('/apifb/login', {email: email.value, password: password.value})
           $store.commit('currentUser/userData', response.data)
           $store.commit('currentUser/setAuth')
           $q.notify({
@@ -109,7 +109,7 @@ export default {
             icon: 'cloud_done',
             message: 'Вы успешно авторизовались.'
           })
-          await router.go(-1)
+          await router.push('/')
         }
         catch (error) {
           $q.notify({

@@ -6,7 +6,7 @@ require('firebase/database')
 const { ErrorHandler } = require('../helpers/errorHandler.js')
 
 
-router.post(`/api/login`, async (req, res, next) => {
+router.post(`/apifb/login`, async (req, res, next) => {
   try {
     const {email, password} = req.body
     if (!email) throw new ErrorHandler(404, 'Email не может быть пустым.')

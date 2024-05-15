@@ -5,7 +5,7 @@ require('firebase/auth')
 require('firebase/database')
 const { ErrorHandler } = require('../helpers/errorHandler.js')
 
-router.get(`/api/logout`, async (req, res, next) => {
+router.get(`/apifb/logout`, async (req, res, next) => {
   try {
     await firebase
       .auth()

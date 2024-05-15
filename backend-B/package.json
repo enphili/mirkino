@@ -1,11 +1,11 @@
 {
-  "name": "backend",
+  "name": "backend-B",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "server": "nodemon index.js",
-    "start": "node index.js"
+    "server": "cross-env NODE_ENV=development nodemon index.js",
+    "start": "cross-env NODE_ENV=production node index.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,11 +13,12 @@
     "@types/express": "^4.17.13",
     "axios": "^0.21.1",
     "colors": "^1.4.0",
+    "cors": "^2.8.5",
     "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "firebase": "^8.7.1"
+    "express": "^4.17.1"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "nodemon": "^2.0.12"
   }
 }

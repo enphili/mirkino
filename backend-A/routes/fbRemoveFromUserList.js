@@ -5,7 +5,7 @@ require('firebase/auth')
 require('firebase/database')
 
 
-router.post(`/api/removefromuserlist`, async (req, res, next) => {
+router.post(`/apifb/removefromuserlist`, async (req, res, next) => {
   const {keyStamp, key} = req.body
   try {
     const user = await firebase.auth().currentUser
