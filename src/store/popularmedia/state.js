@@ -3,4 +3,3 @@ export default function () {
     popularMedia: []
   }
 }
-//FIXME попробовать заменить массив на Set
