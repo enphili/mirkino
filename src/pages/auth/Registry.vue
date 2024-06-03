@@ -108,11 +108,11 @@
 
 <script>
 import {useMeta, useQuasar} from 'quasar'
+import {useNotification} from 'src/use/notification'
 import {ref} from 'vue'
 import {emailRegValid} from 'src/utils/emailRegValid'
 import AppCloseForm from 'components/ui/AppCloseForm'
 import {api} from 'boot/axios'
-import errorsText from 'src/utils/errorsText'
 import {useStore} from 'vuex'
 import {useRouter} from 'vue-router'
 
@@ -152,37 +152,34 @@ export default {
       passInput.value.validate()
       confirmpassInput.value.validate()
       if (emailInput.value.hasError || passInput.value.hasError || loginInput.value.hasError || confirmpassInput.value.hasError) {
-        $q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
-          message: 'Проверте правильность заполненых полей формы'
+        await useNotification({
+          router,
+          notify: $q,
+          message: 'Проверьте правильность заполненных полей формы'
         })
       }
       else if (!accept.value) {
-        $q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
+        await useNotification({
+          router,
+          notify: $q,
           message: 'Вы должны согласится с обработкой персональных данных'
         })
       } else {
         try {
           const res = await api.post('/apifb/registry', {...formData.value})
           $store.commit('currentUser/userData', res.data)
-          $q.notify({
-            color: 'green-4',
-            textColor: 'white',
-            icon: 'cloud_done',
+          await useNotification({
+            router,
+            notify: $q,
+            type: 'success',
             message: 'Вы успешно зарегистрировались.'
           })
           await router.push('/')
         } catch (error) {
-          $q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'warning',
-            message: errorsText(error.response ? error.response.data.errorCode : error.message)
+          await useNotification({
+            router,
+            notify: $q,
+            error
           })
           formData.value.email = ''
         }

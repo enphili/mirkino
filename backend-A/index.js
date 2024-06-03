@@ -9,7 +9,7 @@ const fbLogout = require('./routes/fbLogout.js')
 const fbForget = require('./routes/fbForget.js')
 const fbAddToUserList = require('./routes/fbAddToUserList.js')
 const fbRemoveFromUserList = require('./routes/fbRemoveFromUserList.js')
-const { handleError, ErrorHandler } = require('./helpers/errorHandler.js')
+const { handleError } = require('./helpers/errorHandler.js')
 
 firebase.initializeApp(firebaseConfig)
 
@@ -32,7 +32,7 @@ const corsOptions = {
 // Определение адреса сервера B в зависимости от режима
 const serverB = process.env.NODE_ENV === 'production'
   ? 'http://194.35.119.124:3000' // Адрес для production режима
-  : 'http://127.0.0.1:3050' // Адрес для локальной разработки
+  : 'http://127.0.0.1:3000' // Адрес для локальной разработки
 
 app.use(cors(corsOptions))
 app.use(express.json())
@@ -58,13 +58,10 @@ app.get('/api/*', async (request, response) => {
         response.json(data)
       }
       else {
-        const errorData = await res.text()
-        const error = new ErrorHandler(res.status, errorData)
-        handleError(error, response)
+        throw await res.json()
       }
   }
   catch (error) {
-    console.log(error)
     handleError(error, response)
   }
 })

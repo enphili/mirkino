@@ -32,10 +32,10 @@
 <script>
 import AppCloseForm from 'components/ui/AppCloseForm'
 import {useMeta, useQuasar} from 'quasar'
+import {useNotification} from 'src/use/notification'
 import {ref} from 'vue'
 import {api} from 'boot/axios'
 import {emailRegValid} from 'src/utils/emailRegValid'
-import errorsText from 'src/utils/errorsText'
 import {useRouter} from 'vue-router'
 
 export default {
@@ -59,10 +59,9 @@ export default {
     const onSubmit = async () => {
       emailInput.value.validate()
       if (emailInput.value.hasError) {
-        $q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
+        await useNotification({
+          router,
+          notify: $q,
           message: 'Похоже email заполнен не правильно'
         })
       } else {
@@ -71,18 +70,17 @@ export default {
           if (response.status === 200) {
             await router.push('/login')
           }
-          $q.notify({
-            color: 'green-4',
-            textColor: 'white',
-            icon: 'cloud_done',
+          await useNotification({
+            router,
+            notify: $q,
+            type: 'success',
             message: 'Ссылка на сброс пароля отправлена Вам на email.'
           })
         } catch (error) {
-          $q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'warning',
-            message: errorsText(error.response ? error.response.data.errorCode : error.message)
+          await useNotification({
+            router,
+            notify: $q,
+            error
           })
         }
       }

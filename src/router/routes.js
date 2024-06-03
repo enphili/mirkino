@@ -160,13 +160,17 @@ const routes = [
     }
   },
   {
-    path: '/:catchAll(.*)*',
+    path: '/404',
     name: 'Error404',
     component: () => import('../pages/Error404.vue'),
     meta: {
       layout: 'main',
       auth: false
     }
+  },
+  {
+    path: '/:catchAll(.*)*',
+    redirect: '/404'
   }
 ]
 

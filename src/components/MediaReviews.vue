@@ -54,6 +54,7 @@ export default {
   },
 
   setup (props) {
+    console.log()
     return {
       useAuthorAvatarPath,
       reviewRating: [...props.reviews.map(el => el.author_details.rating / 2)],

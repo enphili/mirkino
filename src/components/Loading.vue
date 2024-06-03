@@ -1,5 +1,7 @@
 <template>
-  <div class="loader">Loading...</div>
+  <div class="loader-container">
+    <div class="loader">Loading...</div>
+  </div>
 </template>
 
 <script>
@@ -9,6 +11,16 @@ export default {
 </script>
 
 <style scoped lang="sass">
+.loader-container
+  position: absolute
+  inset: 0
+  width: 100%
+  height: 100%
+  display: flex
+  justify-content: center
+  align-items: center
+  background-color: $dark
+  z-index: 9999
 .loader
   color: $accent
   font-size: 40px

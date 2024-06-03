@@ -82,22 +82,24 @@
     size="16px"
     color="accent"
     icon="expand_less"
+    aria-label="Прокрутить вверх"
     @click="useScrollUpPage"
   />
 
 </template>
 
 <script>
-import {defineComponent, ref, computed} from 'vue';
-import {useQuasar} from 'quasar'
-import {useStore} from 'vuex'
-import {useScrollUpPage} from 'src/use/scrollUpPage'
-import errorsText from 'src/utils/errorsText'
-import {useSortMedia} from 'src/use/sortMedia'
-import Loading from '../components/Loading'
+import {SCROLL_THRESHOLD} from 'boot/scrollThreshold'
 import FilmCard from 'components/FilmCard'
 import TheMetaTags from 'components/meta/TheMetaTags'
-
+import {useQuasar} from 'quasar'
+import {getReleaseYears} from 'src/use/getReleaseYears'
+import {useNotification} from 'src/use/notification'
+import {useScrollUpPage} from 'src/use/scrollUpPage'
+import {useSortMedia} from 'src/use/sortMedia'
+import {computed, defineComponent, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useStore} from 'vuex'
 
 export default defineComponent({
   name: 'PageIndex',
@@ -105,22 +107,16 @@ export default defineComponent({
   setup() {
     const $q = useQuasar()
     const $store = useStore()
+    const router = useRouter()
     const showScrollUpBtn = ref(false)
     const typeModel = ref(null)
     const ratingModel = ref(null)
     const releaseModel = ref(null)
+    const popularMedia = $store.getters['popularMedia/getPopularMedia']
 
-    const releaseOptions = computed(() => {
-      const year = $store.getters['popularMedia/getPopularMedia'].map(date => {
-        if (date.release_date) return date.release_date.substring(0, 4)
-        if (date.first_air_date) return date.first_air_date.substring(0, 4)
-        return 'н/д'
-      })
-      year.sort((a, b) => b - a)
-      return Array.from(new Set(year))
-    })
+    const releaseOptions = computed(() => getReleaseYears(popularMedia))
 
-    const trendingMedia = computed(() => $store.getters['popularMedia/getPopularMedia']
+    const trendingMedia = computed(() => popularMedia
       .filter(media => typeModel.value ? media.media_type === typeModel.value : true)
       .sort(useSortMedia(ratingModel.value))
       .filter(media => {
@@ -138,17 +134,15 @@ export default defineComponent({
         done()
       }
       catch (error) {
-        $q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
-          message: errorsText(error.response ? error.response.data.errorCode : error.message)
+        await useNotification({
+          router,
+          notify: $q,
+          error,
         })
       }
     }
 
-    const onScroll = position => position >= 600 ? showScrollUpBtn.value = true : showScrollUpBtn.value = false
-
+    const onScroll = position => showScrollUpBtn.value = position >= SCROLL_THRESHOLD
 
     return { trendingMedia, loadMedia, onScroll, showScrollUpBtn,
       useScrollUpPage, typeModel, ratingModel, releaseModel, releaseOptions,
@@ -157,6 +151,6 @@ export default defineComponent({
     }
   },
 
-  components: { FilmCard, Loading, TheMetaTags }
+  components: { FilmCard, TheMetaTags }
 })
 </script>

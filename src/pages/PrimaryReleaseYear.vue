@@ -1,7 +1,7 @@
 <template>
   <TheMetaTags
     :title="`Мир кино | Лучшие фильмы за ${year} год`"
-    :description="`Страница с результами поиска по базе лучших фильмов за ${year} год`"
+    :description="`Страница с результатами поиска по базе лучших фильмов за ${year} год`"
   />
 
   <q-page class="q-px-md overflow-hidden">
@@ -35,16 +35,19 @@
     size="16px"
     color="accent"
     icon="expand_less"
+    aria-label="Прокрутить вверх"
     @click="useScrollUpPage"
   />
 </template>
 
 <script>
+import {SCROLL_THRESHOLD} from 'boot/scrollThreshold'
 import TheMetaTags from 'components/meta/TheMetaTags'
 import FilmCard from 'components/FilmCard'
+import {useNotification} from 'src/use/notification'
+import {useServiceMergeUniqueData} from 'src/use/servise/mergeUniqueData'
+import {useRouter} from 'vue-router'
 import {useStore} from 'vuex'
-import {api} from 'boot/axios'
-import errorsText from 'src/utils/errorsText'
 import {ref} from 'vue'
 import {useQuasar} from 'quasar'
 import {useScrollUpPage} from 'src/use/scrollUpPage'
@@ -55,29 +58,29 @@ export default {
   setup() {
     const $q = useQuasar()
     const $store = useStore()
+    const router = useRouter()
     const showScrollUpBtn = ref(false)
     const year = $store.getters['primaryreleaseyear/getPrimaryReleaseYear']
-    const totalSearchPage = ref(1)
     const moviesResult = ref([])
 
-    const onScroll = position => position >= 600 ? showScrollUpBtn.value = true : showScrollUpBtn.value = false
+    const onScroll = position => showScrollUpBtn.value = position >= SCROLL_THRESHOLD
 
     const loadPrimaryReleaseYear = async (index, done) => {
-      if (totalSearchPage.value >= index) {
-        try {
-          const res = await api.get(`/api/primaryreleaseyear?year=${year}&page=${index}`)
-          moviesResult.value.push(...res.data.results)
-          totalSearchPage.value = res.data.total_pages
-          done()
-        }
-        catch (error) {
-          $q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'warning',
-            message: errorsText(error.response ? error.response.data.errorCode : error.message)
-          })
-        }
+      try {
+        await useServiceMergeUniqueData({
+          index,
+          url: '/api/primaryreleaseyear',
+          params: {year},
+          obj: moviesResult.value,
+          done
+      })
+      }
+      catch (error) {
+        await useNotification({
+          router,
+          notify: $q,
+          error,
+        })
       }
     }
 

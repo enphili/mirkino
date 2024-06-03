@@ -1,5 +1,21 @@
+const formatRuntime = minutes => {
+  minutes = Number(minutes)
+  if (isNaN(minutes) || minutes <= 0) return ''
+
+  const hours = Math.trunc(minutes / 60)
+  const remainingMinutes = minutes % 60
+  return `${hours > 0 ? hours + ' ч' : ''} ${remainingMinutes > 0 ? remainingMinutes + ' мин' : ''}`.trim()
+}
+
 export const useDividedRuntime = (mediaType, time) => {
-  if (!time || time.length === 0) return 'нет данных о длительности'
-  if (mediaType === 'movie') return `${Math.trunc(time / 60) === 0 ? '' : Math.trunc(time / 60) + ' ч'} ${time % 60 === 0 ? '' : time % 60 + ' мин'}`
-  if (mediaType === 'tv') return `серии по ${Math.trunc(time[0] / 60) === 0 ? '' : Math.trunc(time[0] / 60) + ' ч'} ${time[0] % 60 === 0 ? '' : time[0] % 60 + ' мин'}`
+  time = Number(time)
+  if (isNaN(time) || time <= 0) return ''
+  switch (mediaType) {
+    case 'movie':
+      return  formatRuntime(time)
+    case 'tv':
+      return `серии по ${formatRuntime(time)}`
+    default:
+      return ''
+  }
 }

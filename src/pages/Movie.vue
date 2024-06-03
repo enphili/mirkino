@@ -1,10 +1,15 @@
 <template>
-  <TheMetaTags
-    :title="'Мир кино | ' + calculatedMediaTitle"
-    :description="metaDescription"
+
+  <Loading
+    v-if="loader"
   />
 
-    <main-bg-image
+  <TheMetaTags
+    :title="'Мир кино | ' + mediaTitle"
+    description="Страница с подробной информацией о фильме"
+  />
+
+  <main-bg-image
     v-if="mediaData.bgUrl"
     :url="mediaData.bgUrl"
     :title="mediaData.mediaTitle"
@@ -12,7 +17,7 @@
   />
 
   <q-page class="q-px-md overflow-hidden">
-    <div class="container" style="margin-top: 30%" v-scroll="onScroll">
+    <div class="container mt30percent" v-scroll="onScroll">
 
       <MainTitleBlock
         v-if="mediaData.mediaTitle"
@@ -121,21 +126,21 @@
     size="16px"
     color="accent"
     icon="expand_less"
+    aria-label="Прокрутить вверх"
     @click="useScrollUpPage"
   />
 
 </template>
 
 <script>
+import {SCROLL_THRESHOLD} from 'boot/scrollThreshold'
+import Loading from 'components/Loading.vue'
 import {useQuasar} from 'quasar'
-import { ref, onMounted, reactive } from 'vue'
-import {api} from 'boot/axios'
-import errorsText from 'src/utils/errorsText'
-import {useRoute, useRouter} from 'vue-router'
-import countries from '../utils/countries.js'
-import {useDividedRuntime} from 'src/use/dividedRuntime'
-import {useDividedReleaseDate} from 'src/use/dividedReleaseDate'
-import {useMediaCertification} from 'src/use/getMediaCertification'
+import {useNavigateTo} from 'src/use/navigateTo'
+import {useNotification} from 'src/use/notification'
+import {useServiceMovie} from 'src/use/servise/movie'
+import {ref, onMounted, reactive, computed} from 'vue'
+import {useRouter} from 'vue-router'
 import {useScrollUpPage} from 'src/use/scrollUpPage'
 import JustALightbox from 'components/JustALightbox'
 import MainBgImage from 'components/MainBgImage'
@@ -148,102 +153,68 @@ import EpisodesCollection from 'components/EpisodesCollection'
 import TheMetaTags from 'components/meta/TheMetaTags'
 import MediaReviews from 'components/MediaReviews'
 import RightMediaBlockActions from 'components/RightMediaBlockActions'
-import {useGetPosterUrl} from 'src/use/getPosterUrl'
 
 export default {
   name: "Movie",
   props: ['mediaTitle', 'mediaID'],
 
-  setup() {
+  setup(props) {
     const $q = useQuasar()
-    const route = useRoute()
     const router = useRouter()
-    const mediaID = ref(route.params.mediaID)
-    const calculatedMediaTitle = ref(route.params.mediaTitle)
-    const metaDescription = ref('Страница с подробной информацией о фильме')
+    const loader = ref(true)
     const index = ref(null)
     const mediaData = reactive({})
-    const mediaDataShotCut = reactive({})
     const showScrollUpBtn = ref(false)
-    const basePosterURL = useGetPosterUrl('https://image.tmdb.org/t/p/w500')
+    const mediaDataShotCut = computed(() => {
+      const {id, type, mediaTitle, originalMediaTitle, posterPath, year } = mediaData
+      return {id, type, title: mediaTitle || originalMediaTitle, posterPath, year }
+    })
 
     // hooks
-    onMounted(async () => await getMediaData())
-
-    // methods
-    const getMediaData = async () => {
+    onMounted(async () => {
       try {
-        const [response, response2, response3, response4, response5] = await Promise.all([
-          api.get(`/api/filminfo?id=${mediaID.value}&type=movie`),
-          api.get(`/api/trailers?id=${mediaID.value}&type=movie`),
-          api.get(`/api/recomendmedia?id=${mediaID.value}&type=movie`),
-          api.get(`/api/similarmedia?id=${mediaID.value}&type=movie`),
-          api.get(`/api/reviews?id=${mediaID.value}&type=movie`)
-        ])
-        mediaData.tags = response.data.genres
-        mediaData.productionCountries = response.data.production_countries.map(el => countries(el.iso_3166_1))
-        mediaData.bgUrl = 'https://image.tmdb.org/t/p/original' + response.data.backdrop_path
-        mediaData.mediaTitle = response.data.title
-        mediaData.originalMediaTitle = response.data.original_title
-        mediaData.tagline = response.data.tagline.replace(/\.$/, "")
-        mediaData.description = response.data.overview
-        mediaData.runtime = useDividedRuntime('movie', response.data.runtime)
-        mediaData.certification = useMediaCertification('movie', response.data.release_dates.results)
-        mediaData.homepageUrl = response.data.homepage
-        mediaData.trailersData = response2.data
-        if (!!response.data.belongs_to_collection) {
-          const collection = await api.get(`/api/belongs?id=${response.data.belongs_to_collection.id}`)
-          mediaData.hasCollection = !!collection.data
-          mediaData.collectionName = collection.data.name
-          mediaData.collectionDescription = collection.data.overview
-          mediaData.collectionParts = collection.data.parts
-        }
-        mediaData.castActors = response.data.credits.cast
-        mediaData.recomendMedia = response3.data.results
-        mediaData.similarMedia = response4.data.results
-        mediaData.reviews = response5.data
-
-        mediaDataShotCut.id = +mediaID.value
-        mediaDataShotCut.type = 'movie'
-        mediaDataShotCut.title = response.data.title || response.data.original_title
-        mediaDataShotCut.posterPath = basePosterURL(response.data.poster_path)
-        mediaDataShotCut.year = useDividedReleaseDate(response.data.release_date)
+        await useServiceMovie(props.mediaID, mediaData)
+        loader.value = false
       }
       catch (error) {
-        $q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
-          message: errorsText(error.response ? error.response.data.errorCode : error.message)
+        await useNotification({
+          router,
+          notify: $q,
+          error
         })
       }
-    }
+    })
 
+    // methods
     const changeFilm = async item => {
-      await router.push({name: 'movie', params: {mediaTitle: item.title || item.original_title, mediaID: item.id}})
-    }
-
-    const showActorInfo = async item => {
-      await router.push({
-        name: 'actors',
-        params: {
-          actorName: item.name,
-          personId: item.id
-        }
+      await useNavigateTo(router, 'movie', {
+        mediaTitle: item.title || item.original_title,
+        mediaID: item.id
       })
     }
 
-    const onScroll = position => position >= 600 ? showScrollUpBtn.value = true : showScrollUpBtn.value = false
+    const showActorInfo = async item => {
+      await useNavigateTo(router, 'actors', {
+        actorName: item.name,
+        personId: item.id
+      })
+    }
 
-    return { index, mediaData, changeFilm, calculatedMediaTitle, metaDescription, onScroll,
+    const onScroll = position => showScrollUpBtn.value = position >= SCROLL_THRESHOLD
+
+    return { index, mediaData, changeFilm, onScroll, loader,
       showScrollUpBtn, useScrollUpPage, showActorInfo, mediaDataShotCut }
   },
 
-  components: { JustALightbox, MainBgImage, MainTitleBlock, MainReleaseInfo, MainDescription,
+  components: {
+    Loading, JustALightbox, MainBgImage, MainTitleBlock, MainReleaseInfo, MainDescription,
     TrailerAndHomepageData, LeftMediaPoster, EpisodesCollection, TheMetaTags, MediaReviews,
     RightMediaBlockActions
   }
 }
 </script>
 
-
+<style lang="sass">
+.mt30percent
+  margin-top: 30%
+</style>

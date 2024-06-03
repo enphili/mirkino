@@ -7,7 +7,7 @@
     >
       <q-icon
         name="play_circle_outline"
-        style="font-size:2em;margin-right:5px;margin-top: -3px"
+        class="trailer-icon"
       />
       {{ ctaTrailers }}
     </a>
@@ -19,7 +19,7 @@
       target="_blank">
       <q-icon
         name="language"
-        style="font-size:2em;margin-right:5px;margin-top: -3px"
+        class="trailer-icon"
       />
       {{ ctaHomepage }}
     </a>
@@ -45,3 +45,9 @@ export default {
 }
 </script>
 
+<style lang="sass">
+.trailer-icon
+  font-size: 2em
+  margin-right: 5px
+  margin-top: -3px
+</style>

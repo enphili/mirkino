@@ -36,48 +36,51 @@
     size="16px"
     color="accent"
     icon="expand_less"
+    aria-label="Прокрутить вверх"
     @click="useScrollUpPage"
   />
 </template>
 
 <script>
+import {SCROLL_THRESHOLD} from 'boot/scrollThreshold'
 import TheMetaTags from 'components/meta/TheMetaTags'
 import FilmCard from 'components/FilmCard'
+import {useNotification} from 'src/use/notification'
+import {useServiceMergeUniqueData} from 'src/use/servise/mergeUniqueData'
 import { ref } from 'vue'
 import {useScrollUpPage} from 'src/use/scrollUpPage'
 import {useQuasar} from 'quasar'
-import errorsText from 'src/utils/errorsText'
-import {api} from 'boot/axios'
+import {useRouter} from 'vue-router'
 
 export default {
   name: "UpcomingMovies",
 
   setup() {
     const $q = useQuasar()
+    const router = useRouter()
     const showScrollUpBtn = ref(false)
-    const totalSearchPage = ref(1)
     const upcomingFilms = ref([])
 
     const loadMedia = async (index, done) => {
-      if (totalSearchPage.value >= index) {
-        try {
-          const res = await api.get(`/api/upcoming?page=${index}`)
-          upcomingFilms.value.push(...res.data.results)
-          totalSearchPage.value = res.data.total_pages
-          done()
-        }
-        catch (error) {
-          $q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'warning',
-            message: errorsText(error.response ? error.response.data.errorCode : error.message)
-          })
-        }
+      try {
+        await useServiceMergeUniqueData({
+          index,
+          url: '/api/upcoming',
+          params: {},
+          obj: upcomingFilms.value,
+          done
+        })
+      }
+      catch (error) {
+        await useNotification({
+          router,
+          notify: $q,
+          error,
+        })
       }
     }
 
-    const onScroll = position => position >= 600 ? showScrollUpBtn.value = true : showScrollUpBtn.value = false
+    const onScroll = position => showScrollUpBtn.value = position >= SCROLL_THRESHOLD
 
     return { showScrollUpBtn, useScrollUpPage, onScroll, upcomingFilms, loadMedia}
   },
@@ -85,4 +88,3 @@ export default {
   components: { TheMetaTags, FilmCard }
 }
 </script>
-

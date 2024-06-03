@@ -24,13 +24,13 @@
 </template>
 
 <script>
+import {useNotification} from 'src/use/notification'
 import {ref, onMounted} from 'vue'
 import { useQuasar } from 'quasar'
 import {useRouter} from 'vue-router'
 import {useStore} from 'vuex'
 import {api} from 'boot/axios'
 import { upperCaseFirstChar } from '../utils/upperCaseFirstChar'
-import errorsText from 'src/utils/errorsText'
 
 export default {
   name: "AuthInfo",
@@ -54,19 +54,18 @@ export default {
         await api.get('/apifb/logout') // выход из firebase
         $store.commit('currentUser/logout') // обнуление state и очистка localstorage
         getUserData() // замена никнейма на - 'гость'
-        $q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'cloud_done',
+        await useNotification({
+          router,
+          notify: $q,
+          type: 'success',
           message: 'Вы вышли из системы'
         })
       }
       catch (error) {
-        $q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
-          message: errorsText(error.response ? error.response.data.errorCode : error.message)
+        await useNotification({
+          router,
+          notify: $q,
+          error
         })
       }
     }

@@ -1,11 +1,12 @@
-const { configure } = require('quasar/wrappers');
+const { configure } = require('quasar/wrappers')
 
 module.exports = configure(function (ctx) {
   return {
     supportTS: false,
 
     boot: [
-      'axios'
+      'axios',
+      'scrollThreshold'
     ],
 
     css: [
@@ -112,4 +113,4 @@ module.exports = configure(function (ctx) {
       }
     }
   }
-});
+})

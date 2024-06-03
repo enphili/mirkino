@@ -1,7 +1,7 @@
 <template>
   <TheMetaTags
     :title='`Мир кино | Результаты поиска ${ mediaType === "movie" ? "фильмов" : "сериалов"} по тегу "${genresName}"`'
-    :description='`Страница с результами поиска по базе фильмов и сериалов содержащих тег - "${genresName}"`'
+    :description='`Страница с результатами поиска по базе фильмов и сериалов содержащих тег - "${genresName}"`'
   />
 
   <q-page class="q-px-md overflow-hidden">
@@ -66,17 +66,19 @@
     size="16px"
     color="accent"
     icon="expand_less"
+    aria-label="Прокрутить вверх"
     @click="useScrollUpPage"
   />
 
 </template>
 
 <script>
+import {SCROLL_THRESHOLD} from 'boot/scrollThreshold'
 import TheMetaTags from 'components/meta/TheMetaTags'
 import FilmCard from 'components/FilmCard'
+import {getReleaseYears} from 'src/use/getReleaseYears'
+import {useServiceMergeUniqueData} from 'src/use/servise/mergeUniqueData'
 import {computed, ref} from 'vue'
-import {api} from 'boot/axios'
-import errorsText from 'src/utils/errorsText'
 import {useQuasar} from 'quasar'
 import {useSortMedia} from 'src/use/sortMedia'
 import {useScrollUpPage} from 'src/use/scrollUpPage'
@@ -90,37 +92,20 @@ export default {
     const showScrollUpBtn = ref(false)
     const searchResult = ref([])
     const releaseModel = ref(null)
-    const totalSearchPage = ref(1)
     const ratingModel = ref(null)
 
     const loadSearchByGenres = async (index, done) => {
-      if (totalSearchPage.value >= index) {
-        try {
-          const res = await api.get(`/api/searchbygenres?mediaType=${props.mediaType}&genresId=${props.genresId}&page=${index}`)
-          searchResult.value.push(...res.data.results)
-          totalSearchPage.value = res.data.total_pages
-          done()
-        }
-        catch (error) {
-          $q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'warning',
-            message: errorsText(error.response ? error.response.data.errorCode : error.message)
-          })
-        }
-      }
+      await useServiceMergeUniqueData({
+        $q,
+        index,
+        url: '/api/searchbygenres',
+        params: {mediaType: props.mediaType, genresId: props.genresId},
+        obj: searchResult.value,
+        done
+      })
     }
 
-    const releaseOptions = computed(() => {
-      const year = searchResult.value.map(date => {
-        if (date.release_date) return date.release_date.substring(0, 4)
-        if (date.first_air_date) return date.first_air_date.substring(0, 4)
-        return 'н/д'
-      })
-      year.sort((a, b) => b - a)
-      return Array.from(new Set(year))
-    })
+    const releaseOptions = computed(() => getReleaseYears(searchResult.value))
 
     const genresMedia = computed(() => searchResult.value
       .filter(media => {
@@ -131,7 +116,7 @@ export default {
       })
       .sort(useSortMedia(ratingModel.value)))
 
-    const onScroll = position => position >= 600 ? showScrollUpBtn.value = true : showScrollUpBtn.value = false
+    const onScroll = position => showScrollUpBtn.value = position >= SCROLL_THRESHOLD
 
     return {
       ratingOptions: [{label:'По возрастанию', value: '+'}, {label:'По убыванию', value: '-'}],

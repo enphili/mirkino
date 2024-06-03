@@ -1,7 +1,7 @@
 <template>
   <TheMetaTags
     title="Мир кино | Результаты поиска"
-    description="Страница с результами поиска по базе фильмов, актеров, сериалов"
+    description="Страница с результатами поиска по базе фильмов, актеров, сериалов"
   />
 
   <q-page class="q-px-md overflow-hidden">
@@ -46,7 +46,7 @@
       @load="loadSearchResult"
     >
       <film-card
-        v-for="item in searchResult.filter(media => typeModel ? media.media_type === typeModel : true).sort(useSortMedia(ratingModel))"
+        v-for="item in filteredAndSortedSearchResult"
         :media-id="item.id"
         :key="item.id"
         :media="item"
@@ -66,18 +66,21 @@
     size="16px"
     color="accent"
     icon="expand_less"
+    aria-label="Прокрутить вверх"
     @click="useScrollUpPage"
   />
 
 </template>
 
 <script>
-import {api} from 'boot/axios'
-import errorsText from 'src/utils/errorsText'
+import {SCROLL_THRESHOLD} from 'boot/scrollThreshold'
+import {useNotification} from 'src/use/notification'
+import {useServiceMergeUniqueData} from 'src/use/servise/mergeUniqueData'
 import {useQuasar} from 'quasar'
-import {ref} from 'vue'
+import {ref, computed} from 'vue'
 import {useScrollUpPage} from 'src/use/scrollUpPage'
 import {useSortMedia} from 'src/use/sortMedia'
+import {useRouter} from 'vue-router'
 import Loading from '../components/Loading'
 import TheMetaTags from 'components/meta/TheMetaTags'
 import FilmCard from 'components/FilmCard'
@@ -88,41 +91,47 @@ export default {
 
   setup(props) {
     const $q = useQuasar()
+    const router = useRouter()
     const showScrollUpBtn = ref(false)
     const searchResult = ref([])
-    const totalSearchPage = ref(1)
+    const typeModel = ref(null)
+    const ratingModel = ref(null)
 
     const loadSearchResult = async (index, done) => {
-      if (totalSearchPage.value >= index) {
-        try {
-          const res = await api.get(`/api/search?query=${encodeURIComponent(props.searchText.toLowerCase())}&page=${index}`)
-          searchResult.value.push(...res.data.results)
-          totalSearchPage.value = res.data.total_pages
-          done()
-        }
-        catch (error) {
-          $q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'warning',
-            message: errorsText(error.response ? error.response.data.errorCode : error.message)
-          })
-        }
+      try {
+        await useServiceMergeUniqueData({
+          index,
+          url: `/api/search?query=${encodeURIComponent(props.searchText.toLowerCase())}`,
+          params: {},
+          obj: searchResult.value,
+          done
+        })
+      }
+      catch (error) {
+        await useNotification({
+          router,
+          notify: $q,
+          error,
+        })
       }
     }
 
+    const filteredAndSortedSearchResult = computed(() => {
+      return searchResult.value
+        .filter(media => typeModel.value ? media.media_type === typeModel.value : true)
+        .sort(useSortMedia(ratingModel.value))
+    })
 
-    const onScroll = position => position >= 600 ? showScrollUpBtn.value = true : showScrollUpBtn.value = false
+    const onScroll = position => showScrollUpBtn.value = position >= SCROLL_THRESHOLD
 
     return { loadSearchResult, showScrollUpBtn, onScroll,
       searchResult, useScrollUpPage, useSortMedia,
-      typeModel: ref(null),
-      ratingModel: ref(null),
+      typeModel, ratingModel, filteredAndSortedSearchResult,
       typeOptions: [{label:'Фильмы', value: 'movie'}, {label:'Сериалы', value: 'tv'}, {label:'Актеры', value: 'person'}],
-      ratingOptions: [{label:'По возрастанию', value: '+'}, {label:'По убыванию', value: '-'}] }
+      ratingOptions: [{label:'По возрастанию', value: '+'}, {label:'По убыванию', value: '-'}]
+    }
   },
 
   components: { Loading, TheMetaTags, FilmCard }
 }
 </script>
-

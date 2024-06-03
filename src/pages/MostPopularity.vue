@@ -1,7 +1,7 @@
 <template>
   <TheMetaTags
     title="Мир кино | Самые популярные фильмы"
-    description="Фильмы находящиеся на пике популярости среди пользователей TMDb"
+    description="Фильмы находящиеся на пике популярности среди пользователей TMDb"
   />
 
   <q-page class="q-px-md overflow-hidden">
@@ -46,7 +46,7 @@
       @load="loadMedia"
     >
       <film-card
-        v-for="film in popularityFilms"
+        v-for="film in sortedPopularMedia"
         :media-id="film.id"
         :key="film.id"
         :media="film"
@@ -68,16 +68,20 @@
     size="16px"
     color="accent"
     icon="expand_less"
+    aria-label="Прокрутить вверх"
     @click="useScrollUpPage"
   />
 </template>
 
 <script>
+import {SCROLL_THRESHOLD} from 'boot/scrollThreshold'
+import {getReleaseYears} from 'src/use/getReleaseYears'
+import {useNotification} from 'src/use/notification'
 import {computed, ref} from 'vue'
 import {useScrollUpPage} from 'src/use/scrollUpPage'
 import {useQuasar} from 'quasar'
-import errorsText from 'src/utils/errorsText'
 import {useSortMedia} from 'src/use/sortMedia'
+import {useRouter} from 'vue-router'
 import {useStore} from 'vuex'
 import TheMetaTags from 'components/meta/TheMetaTags'
 import FilmCard from 'components/FilmCard'
@@ -89,11 +93,13 @@ export default {
   setup() {
     const $q = useQuasar()
     const $store = useStore()
+    const router = useRouter()
     const showScrollUpBtn = ref(false)
     const ratingModel = ref(null)
     const releaseModel = ref(null)
+    const mostPopularMedia = $store.getters['mostpopularmedia/getMostPopularMedia']
 
-    const popularityFilms = computed(() => $store.getters['mostpopularmedia/getMostPopularMedia']
+    const sortedPopularMedia = computed(() => mostPopularMedia
       .filter(media => {
         if (!releaseModel.value) return true
         if (media.release_date) return media.release_date.substring(0, 4) === releaseModel.value
@@ -102,40 +108,30 @@ export default {
       .sort(useSortMedia(ratingModel.value))
     )
 
-
     const loadMedia = async (index, done) => {
-      let chunkNumber = Math.ceil(popularityFilms.value.length / 20)
+      let chunkNumber = Math.ceil(mostPopularMedia.length / 20)
       chunkNumber >= index ? ++chunkNumber : chunkNumber = index
       try {
         await $store.dispatch('mostpopularmedia/loadMostPopularMedia', chunkNumber)
         done()
       }
       catch (error) {
-        $q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
-          message: errorsText(error.response ? error.response.data.errorCode : error.message)
+        await useNotification({
+          router,
+          notify: $q,
+          error
         })
       }
     }
 
-    const releaseOptions = computed(() => {
-      const year = popularityFilms.value.map(date => {
-        if (date.release_date) return date.release_date.substring(0, 4)
-        if (date.first_air_date) return date.first_air_date.substring(0, 4)
-        return 'н/д'
-      })
-      year.sort((a, b) => b - a)
-      return Array.from(new Set(year))
-    })
+    const releaseOptions = computed(() => getReleaseYears(mostPopularMedia))
 
-    const onScroll = position => position >= 600 ? showScrollUpBtn.value = true : showScrollUpBtn.value = false
+    const onScroll = position => showScrollUpBtn.value = position >= SCROLL_THRESHOLD
 
     return {
       ratingOptions: [{label:'По возрастанию', value: '+'}, {label:'По убыванию', value: '-'}],
       showScrollUpBtn, useScrollUpPage, ratingModel, releaseModel, releaseOptions,
-      onScroll, loadMedia, popularityFilms
+      onScroll, loadMedia, sortedPopularMedia
     }
   },
 

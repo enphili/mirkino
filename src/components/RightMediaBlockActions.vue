@@ -72,9 +72,11 @@ export default {
     const isInWishList = ref( false)
     const isInFavoriteList = ref(false)
 
-    const searchByGoogle = () => window.open(`https://www.google.ru/search?q=${props.media.title}+%28${props.media.year}%29+${props.media.seasonNumber ? props.media.seasonNumber.charAt(0).toLowerCase() + props.media.seasonNumber.slice(1) : ''}+смотреть+онлайн`, '_blank')
+    const mediaTypeWord = props.media.type === 'tv' ? 'сериал' : ''
 
-    const searchByYandex = () => window.open(`https://www.yandex.ru/search/?text=${props.media.title}+%28${props.media.year}%29+${props.media.seasonNumber ? props.media.seasonNumber.charAt(0).toLowerCase() + props.media.seasonNumber.slice(1) : ''}+смотреть+онлайн`, '_blank')
+    const searchByGoogle = () => window.open(`https://www.google.ru/search?q=${mediaTypeWord}+${props.media.title}+%28${props.media.year}%29+смотреть+онлайн`, '_blank')
+
+    const searchByYandex = () => window.open(`https://www.yandex.ru/search/?text=${mediaTypeWord}+${props.media.title}+%28${props.media.year}%29+смотреть+онлайн`, '_blank')
 
     if ($store.getters['currentUser/getUserWishList']) {
       const wishlist = Object.values($store.getters['currentUser/getUserWishList'])

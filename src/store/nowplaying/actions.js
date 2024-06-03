@@ -6,6 +6,6 @@ export async function loadNowPlaying ({commit}, pageNumber) {
     commit('setNowPlaying', res.data.results)
   }
   catch (error) {
-    throw new Error(error)
+    throw error.response.data ? error.response.data : error
   }
 }

@@ -1,23 +1,34 @@
 <template>
   <div class="fullscreen bg-dark text-white text-center q-pa-md flex flex-center">
     <div>
-      <div class="not-found-title">
-        404
-      </div>
+      <h1 class="not-found-title">404</h1>
 
-      <div class="mk-text-h3" style="opacity:.7">
+      <p class="mk-text-h3 opacity-07">
         Упс... Кажется такой страницы не существует :)
-      </div>
+      </p>
 
-      <q-btn
-        class="q-mt-xl"
-        color="accent"
-        text-color="white"
-        unelevated
-        to="/"
-        label="На главную"
-        no-caps
-      />
+      <div class="btn-container">
+        <q-btn
+          class="q-mt-xl"
+          color="accent"
+          text-color="white"
+          unelevated
+          @click="goBack"
+          label="Назад"
+          aria-label="Вернуться на шаг назад"
+          no-caps
+        />
+        <q-btn
+          class="q-mt-xl"
+          color="accent"
+          text-color="white"
+          unelevated
+          to="/"
+          label="На главную"
+          aria-label="Вернуться на главную"
+          no-caps
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -37,10 +48,20 @@ export default defineComponent({
         description: {name: 'description', content: 'Страница не найдена т.к. была удалена или ее изначально не существовало '}
       }
     }
-    useMeta(metaData)
-    return {}
-  },
 
-  components: {}
+    const goBack = () => window.history.go(-2)
+
+    useMeta(metaData)
+    return {goBack}
+  }
 })
 </script>
+
+<style lang="sass">
+.opacity-07
+  opacity: .7
+.btn-container
+  display: flex
+  justify-content: center
+  gap: 10px
+</style>

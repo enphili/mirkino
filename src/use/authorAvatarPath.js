@@ -1,5 +1,6 @@
 export const useAuthorAvatarPath = path => {
-  if (!path) return 'https://www.gravatar.com/avatar'
-  if (path.includes('https://')) return path.substring(1)
-  return `https://image.tmdb.org/t/p/w45${path}`
+  if (!path || typeof path !== 'string') return 'https://www.gravatar.com/avatar'
+  if (path.startsWith('https://')) return path
+  if (path.startsWith('/')) return `https://image.tmdb.org/t/p/w45${path}`
+  return 'https://www.gravatar.com/avatar'
 }

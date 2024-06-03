@@ -7,12 +7,9 @@
     :target="isTargetBlank ? '_blank' : ''"
     :href="link"
     :to="routerName"
-    @click="goToPrimaryReleaseYear"
+    @click="handleClick"
   >
-    <q-item-section
-      v-if="icon"
-      avatar
-    >
+    <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" />
     </q-item-section>
 
@@ -34,7 +31,7 @@
           v-model="year"
           :options="years"
           :display-value="year"
-          @update:model-value="getModalValue"
+          @update:model-value="updateYear"
         />
         &nbsp;&nbsp;года
       </q-item-label>
@@ -80,24 +77,27 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    years: Array
+    years: {
+      type: Array,
+      default: () => []
+    }
   },
 
   setup (props) {
     const $store = useStore()
     const router = useRouter()
-    const year = ref(props.years ? props.years[0] : '')
+    const year = ref(props.years.length > 0 ? props.years[0] : '')
 
-    const getModalValue = () => $store.commit('primaryreleaseyear/setPrimaryReleaseYear', year.value)
+    const updateYear = () => $store.commit('primaryreleaseyear/setPrimaryReleaseYear', year.value)
 
-    const goToPrimaryReleaseYear = e => {
-      e.preventDefault()
+    const handleClick = e => {
       if (props.isYear && !e.target.closest('label.selectYear')) {
+        e.preventDefault()
         router.push({name: 'primaryreleaseyear', params: {year: year.value}})
       }
     }
 
-    return { year, getModalValue, goToPrimaryReleaseYear}
+    return { year, updateYear, handleClick}
   }
 })
 </script>

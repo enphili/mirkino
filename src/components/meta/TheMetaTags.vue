@@ -7,8 +7,10 @@ import { watch, toRefs  } from 'vue'
 export default {
   name: "TheMetaTags",
   props: ['title', 'description'],
+
   setup(props) {
     const { title, description } = toRefs(props)
+
     watch([title, description], () => {
       const metaDescription = document.head.querySelector('meta[name="description"]')
       const metaTitle = document.head.querySelector('title')
@@ -26,6 +28,7 @@ export default {
     }, {immediate:true})
     return {}
   },
+
   render() {},
 }
 </script>

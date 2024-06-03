@@ -58,11 +58,11 @@
 <script>
 import { useMeta } from 'quasar'
 import AppCloseForm from 'components/ui/AppCloseForm'
+import {useNotification} from 'src/use/notification'
 import {ref} from 'vue'
 import { useQuasar } from 'quasar'
 import {emailRegValid} from 'src/utils/emailRegValid'
 import {api} from 'boot/axios'
-import errorsText from 'src/utils/errorsText'
 import {useStore} from 'vuex'
 import {useRouter} from 'vue-router'
 
@@ -92,31 +92,29 @@ export default {
       emailInput.value.validate()
       passInput.value.validate()
       if (emailInput.value.hasError || passInput.value.hasError) {
-        $q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
-          message: 'Проверте правильность заполненых полей формы'
+        await useNotification({
+          router,
+          notify: $q,
+          message: 'Проверьте правильность заполненных полей формы'
         })
       } else {
         try {
           const response = await api.post('/apifb/login', {email: email.value, password: password.value})
           $store.commit('currentUser/userData', response.data)
           $store.commit('currentUser/setAuth')
-          $q.notify({
-            color: 'green-4',
-            textColor: 'white',
-            icon: 'cloud_done',
+          await useNotification({
+            router,
+            notify: $q,
+            type: 'success',
             message: 'Вы успешно авторизовались.'
           })
           await router.push('/')
         }
         catch (error) {
-          $q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'warning',
-            message: errorsText(error.response ? error.response.data.errorCode : error.message)
+          await useNotification({
+            router,
+            notify: $q,
+            error
           })
           if (error.response.data.errorCode === 'auth/wrong-password') {
             password.value = ''

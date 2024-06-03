@@ -1,16 +1,20 @@
 <template>
 
+  <Loading
+    v-if="loader"
+  />
+
   <TheMetaTags
     :title="'Мир кино | ' + actorName"
-    :description="metaDescription"
+    description="Страница с подробной информацией об актере"
   />
 
   <q-page class="q-px-md overflow-hidden">
-    <div class="container" style="margin-top: 10%" v-scroll="onScroll">
+    <div class="container mt10percent" v-scroll="onScroll">
 
       <MainTitleBlock
         v-if="actorsData.actorName"
-        :title="actorsData.actorNameRU ? actorsData.actorNameRU : actorsData.actorName"
+        :title="actorsData.actorNameRU || actorsData.actorName"
         :originalTitle="!actorsData.actorNameRU ? '' : actorsData.actorName"
       />
 
@@ -30,7 +34,6 @@
       <div class="content">
 
         <LeftMediaPoster
-          v-if="actorsData.profilePath"
           :posterUrl="actorsData.profilePath"
           error-img-url="unnamed.jpg"
         />
@@ -55,14 +58,26 @@
     </div>
   </q-page>
 
+  <q-btn
+    v-if="showScrollUpBtn"
+    class="up-page-btn"
+    round
+    size="16px"
+    color="accent"
+    icon="expand_less"
+    aria-label="Прокрутить вверх"
+    @click="useScrollUpPage"
+  />
+
 </template>
 
 <script>
+import {useNavigateTo} from 'src/use/navigateTo'
+import {useNotification} from 'src/use/notification'
 import {onMounted, reactive, ref} from 'vue'
-import errorsText from 'src/utils/errorsText'
 import {useQuasar} from 'quasar'
-import {api} from 'boot/axios'
 import {useRouter} from 'vue-router'
+import Loading from 'components/Loading.vue'
 import TheMetaTags from 'components/meta/TheMetaTags'
 import MainTitleBlock from 'components/MainTitleBlock'
 import MainReleaseInfo from 'components/MainReleaseInfo'
@@ -70,74 +85,78 @@ import LeftMediaPoster from 'components/LeftMediaPoster'
 import RightMediaDescription from 'components/RightMediaDescription'
 import TrailerAndHomepageData from 'components/TrailerAndHomepageData'
 import ActorsCombinedCredits from 'components/ActorsCombinedCredits'
-import {useGetPosterUrl} from 'src/use/getPosterUrl'
+import {useServiceActor} from 'src/use/servise/actor'
+import {useScrollUpPage} from 'src/use/scrollUpPage'
+import {SCROLL_THRESHOLD} from 'boot/scrollThreshold'
 
 export default {
-  name: "Actors",
+  name: 'Actors',
   props: ['personId', 'actorName'],
 
   setup(props) {
     const $q = useQuasar()
     const router = useRouter()
-    const metaDescription = ref('Страница с подробной информацией об актере')
     const showScrollUpBtn = ref(false)
     const actorsData = reactive({})
-    const cyrillicPattern = /[\u0400-\u04FF]/
-    const basePosterURL = useGetPosterUrl('https://image.tmdb.org/t/p/w500')
+    const loader = ref(true)
 
     // hooks
-    onMounted(async () => await getActorsData())
-
-    // methods
-    const getActorsData = async () => {
+    onMounted(async () => {
       try {
-        const [res, res2] = await Promise.all([
-          api.get(`/api/actorsinfo?personId=${props.personId}`),
-          api.get(`/api/actorscast?personId=${props.personId}`)
-        ])
-        actorsData.biography = res.data.biography ? res.data.biography : 'данных в базе нет'
-        actorsData.birthday = new Date(res.data.birthday).toLocaleString('ru', { year: 'numeric', month: 'long', day: 'numeric' })
-        actorsData.homepage = res.data.homepage
-        actorsData.placeOfBirth = res.data.place_of_birth
-        actorsData.actorName = res.data.name
-        actorsData.profilePath = basePosterURL(res.data.profile_path)
-        actorsData.actorNameRU = res.data.also_known_as.find(el => cyrillicPattern.test(el))
-        actorsData.cast = res2.data.cast
+        await useServiceActor(props.personId, actorsData)
+        loader.value = false
       }
       catch (error) {
-        $q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
-          message: errorsText(error.response ? error.response.data.errorCode : error.message)
+        await useNotification({
+          router,
+          notify: $q,
+          error,
         })
+      }
+    })
+
+    // methods
+    const onScroll = position => showScrollUpBtn.value = position >= SCROLL_THRESHOLD
+
+    const goToMediaPage = async item => {
+      const routeNames = {
+        movie: 'movie',
+        tv: 'serials'
+      }
+      const routeName = routeNames[item.media_type]
+      if (routeName) {
+        try {
+          await useNavigateTo(router, routeName, {
+            mediaID: item.id,
+            mediaTitle: item.title || item.name
+          })
+        } catch (error) {
+          await useNotification({
+            router,
+            notify: $q,
+            error
+          })
+        }
+      }
+      else {
+        await useNotification({
+          router,
+          notify: $q,
+          message: `Неподдерживаемый тип медиа: ${item.media_type}`
+      })
       }
     }
 
-    const onScroll = position => position >= 600 ? showScrollUpBtn.value = true : showScrollUpBtn.value = false
-
-    const goToMediaPage = async item => {
-      if (item.media_type === 'movie') await router.push({
-          name: 'movie',
-          params: {
-            mediaID: item.id,
-            mediaTitle: item.title
-          }
-        })
-      if (item.media_type === 'tv') await router.push({
-          name: 'serials',
-          params: {
-            mediaID: item.id,
-            mediaTitle: item.title
-          }
-        })
-    }
-
-    return { metaDescription, onScroll, actorsData, goToMediaPage }
+    return { loader, onScroll, actorsData, goToMediaPage, showScrollUpBtn, useScrollUpPage }
   },
 
-  components: { TheMetaTags, MainTitleBlock, MainReleaseInfo, LeftMediaPoster, RightMediaDescription,
+  components: {
+    Loading, TheMetaTags, MainTitleBlock, MainReleaseInfo, LeftMediaPoster, RightMediaDescription,
     TrailerAndHomepageData, ActorsCombinedCredits,  }
 }
 </script>
 
+<style lang="sass">
+.mt10percent
+  margin-top: 10%
+</style>

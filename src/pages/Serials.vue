@@ -1,8 +1,12 @@
 <template>
 
+  <Loading
+    v-if="loader"
+  />
+
   <TheMetaTags
     :title="'Мир кино | ' + mediaTitle"
-    :description="metaDescription"
+    description="Страница с подробной информацией о сериале"
   />
 
   <MainBgImage
@@ -13,7 +17,7 @@
   />
 
   <q-page class="q-px-md overflow-hidden">
-    <div class="container" style="margin-top: 30%" v-scroll="onScroll">
+    <div class="container mt30percent" v-scroll="onScroll">
 
       <MainTitleBlock
         v-if="mediaData.mediaTitle"
@@ -123,21 +127,21 @@
     size="16px"
     color="accent"
     icon="expand_less"
+    aria-label="Прокрутить вверх"
     @click="useScrollUpPage"
   />
 
 </template>
 
 <script>
+import {SCROLL_THRESHOLD} from 'boot/scrollThreshold'
+import Loading from 'components/Loading.vue'
 import {useQuasar} from 'quasar'
-import { ref, onMounted, reactive } from 'vue'
-import {api} from 'boot/axios'
-import errorsText from 'src/utils/errorsText'
-import {useRoute, useRouter} from 'vue-router'
-import countries from '../utils/countries.js'
-import {useDividedRuntime} from 'src/use/dividedRuntime'
-import {useDividedReleaseDate} from 'src/use/dividedReleaseDate'
-import {useMediaCertification} from 'src/use/getMediaCertification'
+import {useNavigateTo} from 'src/use/navigateTo'
+import {useNotification} from 'src/use/notification'
+import {useServiceSeries} from 'src/use/servise/series'
+import {ref, onMounted, reactive, computed} from 'vue'
+import {useRouter} from 'vue-router'
 import {useScrollUpPage} from 'src/use/scrollUpPage'
 import JustALightbox from 'components/JustALightbox'
 import MainBgImage from 'components/MainBgImage'
@@ -150,7 +154,6 @@ import LeftMediaPoster from 'components/LeftMediaPoster'
 import EpisodesCollection from 'components/EpisodesCollection'
 import MediaReviews from 'components/MediaReviews'
 import RightMediaBlockActions from 'components/RightMediaBlockActions'
-import {useGetPosterUrl} from 'src/use/getPosterUrl'
 
 export default {
   name: "Serials",
@@ -158,102 +161,69 @@ export default {
 
   setup(props) {
     const $q = useQuasar()
-    const route = useRoute()
     const router = useRouter()
-    const mediaID = ref(route.params.mediaID)
-    const metaDescription = ref('Страница с подробной информацией о сериале')
+    const loader = ref(true)
     const index = ref(null)
     const mediaData = reactive({})
     const showScrollUpBtn = ref(false)
-    const mediaDataShotCut = reactive({})
-    const basePosterURL = useGetPosterUrl('https://image.tmdb.org/t/p/w500')
 
     // hooks
-    onMounted(async () => await getMediaData())
-
-    // methods
-    const getMediaData = async () => {
+    onMounted(async () => {
       try {
-        const [response, response2, response3, response4, response5 ] = await Promise.all([
-          api.get(`/api/filminfo?id=${mediaID.value}&type=tv`),
-          api.get(`/api/trailers?id=${mediaID.value}&type=tv`),
-          api.get(`/api/reviews?id=${mediaID.value}&type=tv`),
-          api.get(`/api/similarmedia?id=${mediaID.value}&type=tv`),
-          api.get(`/api/recomendmedia?id=${mediaID.value}&type=tv`)
-        ])
-        mediaData.allObj = response.data
-        mediaData.tags = response.data.genres
-        mediaData.productionCountries = response.data.production_countries.map(el => countries(el.iso_3166_1))
-        mediaData.bgUrl = 'https://image.tmdb.org/t/p/original' + response.data.backdrop_path
-        mediaData.mediaTitle = response.data.name
-        mediaData.originalMediaTitle = response.data.original_name
-        mediaData.description = response.data.overview
-        mediaData.runtime = useDividedRuntime('tv', response.data.episode_run_time)
-        mediaData.certification = useMediaCertification('tv', response.data.content_ratings.results)
-        mediaData.homepageUrl = response.data.homepage
-        mediaData.trailersData = response2.data
-        mediaData.tagline = response.data.tagline.replace(/\.$/, "")
-        mediaData.hasSeasons = !!response.data.seasons
-        if (mediaData.hasSeasons) {
-          mediaData.seasons = response.data.seasons
-        }
-        mediaData.castActors = response.data.credits.cast
-        mediaData.reviews = response3.data
-        mediaData.similarMedia = response4.data.results
-        mediaData.recomendMedia = response5.data.results
-
-        mediaDataShotCut.id = +mediaID.value
-        mediaDataShotCut.type = 'tv'
-        mediaDataShotCut.title = response.data.name || response.data.original_name
-        mediaDataShotCut.posterPath = basePosterURL(response.data.poster_path)
-        mediaDataShotCut.year = useDividedReleaseDate(response.data.first_air_date)
+        await useServiceSeries(props.mediaID, mediaData)
+        loader.value = false
       }
       catch (error) {
-        $q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
-          message: errorsText(error.response ? error.response.data.errorCode : error.message)
+        await useNotification({
+          router,
+          notify: $q,
+          error,
         })
       }
-    }
+    })
 
+    const mediaDataShotCut = computed(() => {
+      const {id, type, mediaTitle, originalMediaTitle, posterPath, year} = mediaData
+      return {id, type, title: mediaTitle || originalMediaTitle, posterPath, year}
+    })
+
+    // methods
     const showSeasonInfo = async item => {
-      await router.push({
-        name: 'season',
-        params: {
-          mediaID: mediaID.value,
-          seasonNumber: item.season_number,
-          mediaTitle: props.mediaTitle
-        }
+      await useNavigateTo(router, 'season', {
+        mediaID: props.mediaID,
+        seasonNumber: item.season_number,
+        mediaTitle: props.mediaTitle
       })
     }
 
     const showActorInfo = async item => {
-      await router.push({
-        name: 'actors',
-        params: {
-          actorName: item.name,
-          personId: item.id
-        }
+      await useNavigateTo(router, 'actors', {
+        actorName: item.name,
+        personId: item.id
       })
     }
 
     const showSerial = async item => {
-      await router.push({name: 'serials', params: {mediaTitle: item.name || item.original_name, mediaID: item.id}})
+      await useNavigateTo(router, 'serials', {
+        mediaTitle: item.name || item.original_name,
+        mediaID: item.id
+      })
     }
 
-    const onScroll = position => position >= 600 ? showScrollUpBtn.value = true : showScrollUpBtn.value = false
+    const onScroll = position => showScrollUpBtn.value = position >= SCROLL_THRESHOLD
 
-    return { index, mediaData, showSeasonInfo, metaDescription,
-      showScrollUpBtn, onScroll, useScrollUpPage, showActorInfo,
-      showSerial, mediaDataShotCut }
+    return { index, mediaData, showSeasonInfo, showScrollUpBtn,
+      onScroll, useScrollUpPage, showActorInfo, showSerial,
+      mediaDataShotCut, loader }
   },
 
-  components: { JustALightbox, MainBgImage, TheMetaTags, MainTitleBlock, MainReleaseInfo, MainDescription,
+  components: {
+    Loading, JustALightbox, MainBgImage, TheMetaTags, MainTitleBlock, MainReleaseInfo, MainDescription,
     TrailerAndHomepageData, LeftMediaPoster, EpisodesCollection, MediaReviews, RightMediaBlockActions }
 }
 </script>
 
-
-
+<style lang="sass">
+.mt30percent
+  margin-top: 30%
+</style>

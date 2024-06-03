@@ -1,5 +1,5 @@
 const createUrl = require('./createUrl.js')
-const {handleError} = require('./errorHandler.js')
+// const {handleError} = require('./errorHandler.js')
 const api = require('axios').create({baseURL: 'https://api.themoviedb.org/3'})
 
 // Общая функция для выполнения нескольких запросов
@@ -14,8 +14,7 @@ const fetchAllData = async (req, res, next, path) => {
     res.status(200).json(result)
     next()
   } catch (err) {
-    console.log(err.code)
-    handleError(err, res)
+    // handleError(err, res)
     next(err)
   }
 }

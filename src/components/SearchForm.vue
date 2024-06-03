@@ -14,6 +14,7 @@
 
 <script>
 import {useQuasar} from 'quasar'
+import {useNotification} from 'src/use/notification'
 import errorsText from 'src/utils/errorsText'
 import {ref} from 'vue'
 import {useRouter} from 'vue-router'
@@ -33,11 +34,10 @@ export default {
           e.target.reset()
         }
         catch (error) {
-          $q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'warning',
-            message: errorsText(error.response ? error.response.data.errorCode : error.message)
+          await useNotification({
+            router,
+            notify: $q,
+            error
           })
         }
       }

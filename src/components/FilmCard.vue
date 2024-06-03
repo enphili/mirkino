@@ -73,7 +73,7 @@
 <script>
 import {useRouter} from 'vue-router'
 import {randomItemFromArray} from 'src/utils/randomItemFromArray'
-import {reactive, ref} from 'vue'
+import {reactive, ref, toRefs} from 'vue'
 import {useStore} from 'vuex'
 import {useGetPosterUrl} from 'src/use/getPosterUrl'
 import {useDividedReleaseDate} from 'src/use/dividedReleaseDate'
@@ -81,7 +81,13 @@ import {useDividedReleaseDate} from 'src/use/dividedReleaseDate'
 export default {
   name: "FilmCard",
   props: {
-    media: Object,
+    media: {
+      type: Object,
+      required: true,
+      validator(value) {
+        return value && (value.title || value.name)
+      }
+    },
     mediaType: {
       type: String,
       default: ''
@@ -106,21 +112,22 @@ export default {
     mediaDataShotCut.posterPath = posterURL.value
     mediaDataShotCut.year = useDividedReleaseDate(props.media.release_date || props.media.first_air_date)
 
-    if ($store.getters['currentUser/getUserWishList']) {
-      const wishlist = Object.values($store.getters['currentUser/getUserWishList'])
-      if (wishlist.length > 0 && wishlist.find(el => el.id === props.media.id)) isInStorage.wishList = true
+    const initializeStorage = () => {
+      const wishlist = $store.getters['currentUser/getUserWishList']
+      const favorite = $store.getters['currentUser/getUserFavorite']
+
+      if (wishlist) {
+        isInStorage.wishList = Object.values(wishlist).some(el => el.id === props.media.id)
+      }
+      if (favorite) {
+        isInStorage.favorite = Object.values(favorite).some(el => el.id === props.media.id)
+      }
     }
-    if ($store.getters['currentUser/getUserFavorite']) {
-      const favorite = Object.values($store.getters['currentUser/getUserFavorite'])
-      if (favorite.length > 0 && favorite.find(el => el.id === props.media.id)) isInStorage.favorite = true
-    }
+    initializeStorage()
 
     const showFilmInfo = e => {
-      if (e.target.classList.contains('q-fab') ||
-          e.target.classList.contains('q-btn') ||
-          e.target.classList.contains('q-icon') ||
-          e.target.classList.contains('q-fab__label')
-      ) return
+      if (['q-fab', 'q-btn', 'q-icon', 'q-fab__label'].some(cls => e.target.classList.contains(cls))) return
+
       if (props.media.media_type === 'movie' || props.mediaType === 'movie') {
         router.push({
           name: 'movie',
@@ -151,16 +158,14 @@ export default {
     }
 
     const toggleUserList = async key => {
-      if (isInStorage[key]) {
-        const res = await $store.dispatch('currentUser/removeFromUserList', {list: key, id: props.media.id})
-        if (res === 'relogin') await router.push('/relogin')
-        if (res === 'good') isInStorage[key] = false
-      }
-      else {
-        const res = await $store.dispatch('currentUser/addToUserList', {media: mediaDataShotCut, list: key})
-        if (res === 'relogin') await router.push('/relogin')
-        if (res === 'good') isInStorage[key] = true
-      }
+      const action = isInStorage[key]
+        ? $store.dispatch('currentUser/removeFromUserList', {list: key, id: props.media.id})
+        : $store.dispatch('currentUser/addToUserList', {media: mediaDataShotCut, list: key})
+
+      const res = await action
+
+      if (res === 'relogin') await router.push('/relogin')
+      else if (res === 'good') isInStorage[key] = !isInStorage[key]
     }
 
     return { showFilmInfo, posterURL, randomItemFromArray, animatedCss, qFab,

@@ -2,7 +2,7 @@
   <div class="bg-main-img">
     <q-img
       :src="url"
-      style="width: 100%; height: 100%"
+      class="full-parent"
       fit="contain"
       no-spinner
       position="50% 0"
@@ -17,8 +17,7 @@ export default {
   name: "MainBgImage",
   props: {
     url: {
-      type: String,
-      required: true
+      type: String
     },
     title: String,
     mediaType: String
@@ -26,3 +25,9 @@ export default {
 
 }
 </script>
+
+<style lang="sass">
+.full-parent
+  width: 100%
+  height: 100%
+</style>

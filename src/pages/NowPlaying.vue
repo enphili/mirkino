@@ -53,16 +53,19 @@
     size="16px"
     color="accent"
     icon="expand_less"
+    aria-label="Прокрутить вверх"
     @click="useScrollUpPage"
   />
 
 </template>
 
 <script>
+import {SCROLL_THRESHOLD} from 'boot/scrollThreshold'
+import {useNotification} from 'src/use/notification'
 import {computed, ref} from 'vue'
 import {useScrollUpPage} from 'src/use/scrollUpPage'
-import errorsText from 'src/utils/errorsText'
 import {useQuasar} from 'quasar'
+import {useRouter} from 'vue-router'
 import {useStore} from 'vuex'
 import TheMetaTags from 'components/meta/TheMetaTags'
 import Loading from '../components/Loading'
@@ -74,6 +77,7 @@ export default {
   setup() {
     const $q = useQuasar()
     const $store = useStore()
+    const router = useRouter()
     const ratingModel = ref(null)
     const showScrollUpBtn = ref(false)
 
@@ -92,16 +96,15 @@ export default {
         done()
       }
       catch (error) {
-        $q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
-          message: errorsText(error.response ? error.response.data.errorCode : error.message)
+        await useNotification({
+          router,
+          notify: $q,
+          error,
         })
       }
     }
 
-    const onScroll = position => position >= 600 ? showScrollUpBtn.value = true : showScrollUpBtn.value = false
+    const onScroll = position => showScrollUpBtn.value = position >= SCROLL_THRESHOLD
 
     return {
       ratingModel, showScrollUpBtn, useScrollUpPage, onScroll, loadMedia, nowPlayingFilms,
@@ -112,4 +115,3 @@ export default {
   components: { TheMetaTags, FilmCard, Loading }
 }
 </script>
-

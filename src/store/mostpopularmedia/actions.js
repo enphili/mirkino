@@ -6,6 +6,6 @@ export async function loadMostPopularMedia ({commit}, pageNumber) {
     commit('setMostPopularMedia', res.data.results)
   }
   catch (error) {
-    throw new Error(error)
+    throw error.response.data ? error.response.data : error
   }
 }
