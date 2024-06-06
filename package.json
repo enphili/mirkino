@@ -11,8 +11,7 @@
     "buildpwa": "set NODE_OPTIONS=--openssl-legacy-provider && quasar build -m pwa",
     "buildandroid": "quasar build -m android",
     "androiddev": "quasar dev -m cordova -T android",
-    "androidide": "quasar dev -m android --ide",
-    "test": "echo \"No test specified\" && exit 0"
+    "androidide": "quasar dev -m android --ide"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
