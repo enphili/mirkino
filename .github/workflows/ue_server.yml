@@ -1,4 +1,4 @@
-name: UE deploy
+name: deploy node app to serv2
 on: workflow_dispatch
 jobs:
   name_job:
@@ -6,4 +6,7 @@ jobs:
     steps:
       - name: get code
         run: echo this is test!
-
+      - name: print few line
+        run: |
+          echo this is 1!
+          echo this is 2!
