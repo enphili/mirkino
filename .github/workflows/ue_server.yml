@@ -1,0 +1,9 @@
+name: UE deploy
+on: workflow_dispatch
+jobs:
+  name_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: get code
+        run: echo this is test!
+
