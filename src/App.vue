@@ -13,7 +13,6 @@ export default defineComponent({
   name: 'App',
   setup() {
     const route = useRoute()
-    console.log('test')
     return {
       layout: computed(() => route.meta.layout)
     }
