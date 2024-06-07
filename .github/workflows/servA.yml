@@ -1,0 +1,26 @@
+name: deploy node app to servA
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend-A/**'
+      - '!.env.example'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.MSK_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Copy files to remote server
+        run: |
+          rsync -avz --delete --exclude='node_modules' --exclude='.env.example' --exclude='.env' -e "ssh -p ${{ secrets.MSK_SERVER_PORT }} -o StrictHostKeyChecking=no" backend-A/ ${{ secrets.MSK_USER_LOGIN }}@${{ secrets.MSK_SERVER_IP }}:/home/enphili/web/mir-kino.webfldev.ru/public_html/api
