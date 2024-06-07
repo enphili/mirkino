@@ -20,8 +20,19 @@ jobs:
           node-version: '20.12.2'
           cache: 'npm'
 
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies
         run: npm ci
+
+      - name: List files
+        run: ls -al src
 
       - name: Build
         run: npm run build
@@ -32,6 +43,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.MSK_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
       - name: Copy files to remote server
         run: |
           rsync -avz --delete --exclude='api' --exclude='robots.txt' -e "ssh -p ${{ secrets.MSK_SERVER_PORT }} -o StrictHostKeyChecking=no" dist/spa/ ${{ secrets.MSK_USER_LOGIN }}@${{ secrets.MSK_SERVER_IP }}:/home/enphili/web/mir-kino.webfldev.ru/public_html/api
