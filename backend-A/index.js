@@ -44,6 +44,8 @@ app.use(fbForget)
 app.use(fbRemoveFromUserList)
 app.use(fbAddToUserList)
 
+console.log('jhjh')
+
 app.get('/api/*', async (request, response) => {
   const { method, originalUrl } = request
   try {
