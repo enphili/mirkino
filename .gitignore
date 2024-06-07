@@ -6,13 +6,10 @@
 /src-cordova
 npm-debug.log
 .idea
-/backend-B/package-lock.json
-/backend-A/package-lock.json
 /backend-B/node_modules
 /backend-A/node_modules
 /backend-B/.env
 /backend-A/.env
 /.vscode
 /backend-A/config/firebaseConfig.js
-package-lock.json
 /dist/
