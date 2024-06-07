@@ -6,6 +6,7 @@ on:
     paths:
       - 'backend-A/**'
       - '!.env.example'
+      - '!config/**'
 
 jobs:
   deploy:
@@ -23,4 +24,4 @@ jobs:
 
       - name: Copy files to remote server
         run: |
-          rsync -avz --delete --exclude='node_modules' --exclude='.env.example' --exclude='.env' -e "ssh -p ${{ secrets.MSK_SERVER_PORT }} -o StrictHostKeyChecking=no" backend-A/ ${{ secrets.MSK_USER_LOGIN }}@${{ secrets.MSK_SERVER_IP }}:/home/enphili/web/mir-kino.webfldev.ru/public_html/api
+          rsync -avz --delete --exclude='config/firebaseConfig.js' --exclude='config/firebaseConfig.example.js' --exclude='node_modules' --exclude='.env.example' --exclude='.env' -e "ssh -p ${{ secrets.MSK_SERVER_PORT }} -o StrictHostKeyChecking=no" backend-A/ ${{ secrets.MSK_USER_LOGIN }}@${{ secrets.MSK_SERVER_IP }}:/home/enphili/web/mir-kino.webfldev.ru/public_html/api
