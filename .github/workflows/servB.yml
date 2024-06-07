@@ -23,4 +23,4 @@ jobs:
 
       - name: Copy files to remote server
         run: |
-          rsync -avz --delete --exclude='node_modules' -e "ssh -p ${{ secret.UE_SERVER_PORT }} -o StrictHostKeyChecking=no" backend-B/ ${{ secrets.UE_USER_LOGIN }}@${{ secrets.UE_SERVER_IP }}:/home/enphili/tmdb_api
+          rsync -avz --delete --exclude='node_modules' -e "ssh -p ${{ secrets.UE_SERVER_PORT }} -o StrictHostKeyChecking=no" backend-B/ ${{ secrets.UE_USER_LOGIN }}@${{ secrets.UE_SERVER_IP }}:/home/enphili/tmdb_api
