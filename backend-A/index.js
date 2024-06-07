@@ -31,7 +31,7 @@ const corsOptions = {
 
 // Определение адреса сервера B в зависимости от режима
 const serverB = process.env.NODE_ENV === 'production'
-  ? 'http://194.35.119.124:3000' // Адрес для production режима
+  ? process.env.REMOTE_SERVER // Адрес для production режима
   : 'http://127.0.0.1:3000' // Адрес для локальной разработки
 
 app.use(cors(corsOptions))
