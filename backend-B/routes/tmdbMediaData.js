@@ -6,7 +6,6 @@ const fetchAllData = require('../helpers/fetchAllData.js')
 // Маршруты
 router.get('/api/trendingfilms', async (req, res, next) => {
   const params = {language: 'ru', page: req.query.page}
-  console.log(params)
   await fetchData(req, res, next, '/trending/all/week', params)
 })
 
