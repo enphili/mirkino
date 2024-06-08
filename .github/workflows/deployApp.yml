@@ -36,13 +36,22 @@ jobs:
           NODE_OPTIONS: --openssl-legacy-provider
         run: npm run build
 
+      - name: Upload production-ready code
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-code
+          path: dist/spa
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Download production-ready code
+        uses: actions/download-artifact@v4
+        with:
+          name: production-code
+          path: dist/spa
 
       - name: Setup SSH
         run: |
