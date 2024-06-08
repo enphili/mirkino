@@ -144,6 +144,8 @@ export default defineComponent({
 
     const onScroll = position => showScrollUpBtn.value = position >= SCROLL_THRESHOLD
 
+    console.log('this is test')
+
     return { trendingMedia, loadMedia, onScroll, showScrollUpBtn,
       useScrollUpPage, typeModel, ratingModel, releaseModel, releaseOptions,
       typeOptions: [{label:'Фильмы', value: 'movie'}, {label:'Сериалы', value: 'tv'}, {label:'Актеры', value: 'person'}],
