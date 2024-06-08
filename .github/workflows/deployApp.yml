@@ -31,14 +31,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: List files
-        run: ls -al src
-
       - name: Build
         env:
           NODE_OPTIONS: --openssl-legacy-provider
         run: npm run build
-        working-directory: src
+
+      - name: Check build output
+        run: ls -al dist/spa
 
   deploy:
     needs: build
@@ -53,4 +52,4 @@ jobs:
 
       - name: Copy files to remote server
         run: |
-          rsync -avz --delete --exclude='api' --exclude='robots.txt' -e "ssh -p ${{ secrets.MSK_SERVER_PORT }} -o StrictHostKeyChecking=no" dist/spa/ ${{ secrets.MSK_USER_LOGIN }}@${{ secrets.MSK_SERVER_IP }}:/home/enphili/web/mir-kino.webfldev.ru/public_html/api
+          rsync -avz --delete --exclude='api' --exclude='robots.txt' -e "ssh -p ${{ secrets.MSK_SERVER_PORT }} -o StrictHostKeyChecking=no" dist/spa/ ${{ secrets.MSK_USER_LOGIN }}@${{ secrets.MSK_SERVER_IP }}:/home/enphili/web/mir-kino.webfldev.ru/public_html
