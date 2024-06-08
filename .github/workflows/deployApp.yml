@@ -35,6 +35,8 @@ jobs:
         run: ls -al src
 
       - name: Build
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
         run: npm run build
         working-directory: src
 
