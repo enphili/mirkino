@@ -36,7 +36,13 @@ jobs:
           NODE_OPTIONS: --openssl-legacy-provider
         run: npm run build
 
-      - name: Check build output
+      - name: Check build output root
+        run: ls -al
+
+      - name: Check build output dist
+        run: ls -al dist
+
+      - name: Check build output spa
         run: ls -al dist/spa
 
   deploy:
