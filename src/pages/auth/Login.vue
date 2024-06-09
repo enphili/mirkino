@@ -102,6 +102,7 @@ export default {
           const response = await api.post('/apifb/login', {email: email.value, password: password.value})
           $store.commit('currentUser/userData', response.data)
           $store.commit('currentUser/setAuth')
+          console.log(response.data)
           await useNotification({
             router,
             notify: $q,
@@ -111,6 +112,7 @@ export default {
           await router.push('/')
         }
         catch (error) {
+          console.log(error)
           await useNotification({
             router,
             notify: $q,
