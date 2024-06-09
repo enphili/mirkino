@@ -49,7 +49,7 @@
     <q-btn label="Войти" type="submit" color="accent" class="full-width"/>
   </q-form>
   <router-link class="text-right applink forget-pass" to="/forget">Забыли пароль?</router-link>
-  <p class="text-body2 q-mt-md q-mb-sm">Hет акаунта?</p>
+  <p class="text-body2 q-mt-md q-mb-sm">Hет аккаунта?</p>
   <q-btn class="full-width" outline color="accent" @click="$router.push('/registry')">Зарегистрироваться</q-btn>
   <app-close-form @click.prevent="$router.push('/')"/>
 </div>
