@@ -7,15 +7,14 @@ class ErrorHandler extends Error {
 }
 
 const handleError = (err, res) => {
-  const statusCode = err.statusCode || err.response.status
+  const statusCode = err.statusCode || err.response?.status || err.code || err.errorCode
   const codeNumber = isNaN(statusCode) ? 500 : statusCode
-  const message =  err.message ? err.message : err.response.statusText
   const errorObj = {
     success: false,
     status: 'error',
-    errorCode: codeNumber || statusCode || err.code,
-    message,
-    errorMessage: err.response.statusText ? err.response.statusText : err.message
+    errorCode: codeNumber || err.code,
+    message: err.message || err.response?.statusText,
+    errorMessage: err.response?.statusText || err.code
   }
   res.status(codeNumber).json(errorObj)
 }

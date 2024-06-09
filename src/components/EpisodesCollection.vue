@@ -11,7 +11,7 @@
         class="collection-item q-pa-none"
         @click="$emit('goToItem', item)"
       >
-        <q-img :src="getItemPosterImgUrl(item)" class="poster-img">
+        <q-img :src="getItemPosterImgUrl(item)" class="poster-img" @error="console.log(evt)">
           <q-badge v-if="item.vote_average" align="top" color="accent" class="badge">TMDb: {{ item.vote_average }}</q-badge>
           <template v-slot:error>
             <img :src="getErrorImgUrl(errorImgUrl)" class="unnamed-img"/>
