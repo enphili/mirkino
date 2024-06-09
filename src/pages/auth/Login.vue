@@ -112,7 +112,7 @@ export default {
           await router.push('/')
         }
         catch (error) {
-          console.log(error)
+          console.dir(error)
           await useNotification({
             router,
             notify: $q,
