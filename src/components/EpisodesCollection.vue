@@ -14,7 +14,12 @@
         <q-img :src="getItemPosterImgUrl(item)" class="poster-img" @error="showErrorImg">
           <q-badge v-if="item.vote_average" align="top" color="accent" class="badge">TMDb: {{ item.vote_average }}</q-badge>
           <template v-slot:error>
-            <img :src="getErrorImgUrl(errorImgUrl)" class="unnamed-img" alt="error image"/>
+            <div v-if="showPlaceholder(item)">
+              <img :src="getErrorImgUrl(errorImgUrl)" class="unnamed-img" alt="error image"/>
+            </div>
+            <div v-else class="absolute-full flex flex-center bg-grey-3 text-accent">
+              База данных TMDB заблокирована для России. Воспользуйтесь VPN
+            </div>
           </template>
         </q-img>
         <q-card-section class="q-pa-sm text-weight-bold collection-title">
@@ -72,24 +77,14 @@ export default {
   setup(props) {
     const showMore = ref(true)
     const getPosterUrl = useGetPosterUrl('https://image.tmdb.org/t/p/w342')
-
     const isImgError = ref(true)
-
     const isAllItems = computed(() => props.items.length >= props.quantityDisplayedItems)
 
     const displayedItems = computed(() => {
       return showMore.value ? props.items.slice(0, props.quantityDisplayedItems) : props.items
     })
 
-    const getErrorImgUrl = img => {
-      console.log(isImgError.value)
-      if (isImgError.value) {
-        require('../assets/img/' + img)
-      }
-      else {
-          console.log('База данных TMDB заблокирована для России. Воспользуйтесь VPN')
-      }
-    }
+    const getErrorImgUrl = img => require(`../assets/img/${img}`)
 
     const getItemPosterImgUrl = item => {
       const paths = {
@@ -111,12 +106,19 @@ export default {
       return captions[props.itemType]
     }
 
-    const showErrorImg = (evt) => {
-      console.log(evt)
-      isImgError.value = evt.type === 'error'
+    const showErrorImg = evt => isImgError.value = evt.type === 'error'
+
+    const showPlaceholder = item => {
+      const paths = {
+        movie: item.poster_path,
+        tv: item.poster_path,
+        person: item.profile_path,
+        episode: item.still_path
+      }
+      return !paths[props.itemType]
     }
 
-    return {showMore, showErrorImg, isAllItems, displayedItems, getErrorImgUrl, getItemPosterImgUrl, getItemCaption}
+    return {showMore, showErrorImg, showPlaceholder, isAllItems, displayedItems, getErrorImgUrl, getItemPosterImgUrl, getItemCaption}
   }
 }
 </script>
