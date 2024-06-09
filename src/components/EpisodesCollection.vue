@@ -112,7 +112,7 @@ export default {
     }
 
     const showErrorImg = (evt) => {
-      console.log(evt.type)
+      console.log(evt)
       isImgError.value = evt.type === 'error'
     }
 
