@@ -11,7 +11,7 @@
         class="collection-item q-pa-none"
         @click="$emit('goToItem', item)"
       >
-        <q-img :src="getItemPosterImgUrl(item)" class="poster-img" @error="imgerr">
+        <q-img :src="getItemPosterImgUrl(item)" class="poster-img" @error="showErrorImg">
           <q-badge v-if="item.vote_average" align="top" color="accent" class="badge">TMDb: {{ item.vote_average }}</q-badge>
           <template v-slot:error>
             <img :src="getErrorImgUrl(errorImgUrl)" class="unnamed-img"/>
@@ -73,13 +73,22 @@ export default {
     const showMore = ref(true)
     const getPosterUrl = useGetPosterUrl('https://image.tmdb.org/t/p/w342')
 
+    const isImgError = ref(true)
+
     const isAllItems = computed(() => props.items.length >= props.quantityDisplayedItems)
 
     const displayedItems = computed(() => {
       return showMore.value ? props.items.slice(0, props.quantityDisplayedItems) : props.items
     })
 
-    const getErrorImgUrl = img => require('../assets/img/' + img)
+    const getErrorImgUrl = img => {
+      if (isImgError.value) {
+        require('../assets/img/' + img)
+      }
+      else {
+          console.log('База данных TMDB заблокирована для России. Воспользуйтесь VPN')
+      }
+    }
 
     const getItemPosterImgUrl = item => {
       const paths = {
@@ -101,11 +110,13 @@ export default {
       return captions[props.itemType]
     }
 
-    const imgerr = (evt) => {
-      console.log(evt)
+    const showErrorImg = (evt) => {
+      isImgError.value = evt.type === 'error'
+      console.log(isImgError.value)
+      console.log(evt.type)
     }
 
-    return {showMore, imgerr, isAllItems, displayedItems, getErrorImgUrl, getItemPosterImgUrl, getItemCaption}
+    return {showMore, showErrorImg, isAllItems, displayedItems, getErrorImgUrl, getItemPosterImgUrl, getItemCaption}
   }
 }
 </script>
