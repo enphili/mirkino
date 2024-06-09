@@ -14,7 +14,7 @@
         <q-img :src="getItemPosterImgUrl(item)" class="poster-img" @error="showErrorImg">
           <q-badge v-if="item.vote_average" align="top" color="accent" class="badge">TMDb: {{ item.vote_average }}</q-badge>
           <template v-slot:error>
-            <img :src="getErrorImgUrl(errorImgUrl)" class="unnamed-img"/>
+            <img :src="getErrorImgUrl(errorImgUrl)" class="unnamed-img" alt="error image"/>
           </template>
         </q-img>
         <q-card-section class="q-pa-sm text-weight-bold collection-title">
@@ -82,6 +82,7 @@ export default {
     })
 
     const getErrorImgUrl = img => {
+      console.log(isImgError.value)
       if (isImgError.value) {
         require('../assets/img/' + img)
       }
@@ -111,9 +112,8 @@ export default {
     }
 
     const showErrorImg = (evt) => {
-      isImgError.value = evt.type === 'error'
-      console.log(isImgError.value)
       console.log(evt.type)
+      isImgError.value = evt.type === 'error'
     }
 
     return {showMore, showErrorImg, isAllItems, displayedItems, getErrorImgUrl, getItemPosterImgUrl, getItemCaption}
