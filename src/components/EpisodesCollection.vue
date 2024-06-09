@@ -11,7 +11,7 @@
         class="collection-item q-pa-none"
         @click="$emit('goToItem', item)"
       >
-        <q-img :src="getItemPosterImgUrl(item)" class="poster-img" @error="console.log(evt)">
+        <q-img :src="getItemPosterImgUrl(item)" class="poster-img" @error="imgerr">
           <q-badge v-if="item.vote_average" align="top" color="accent" class="badge">TMDb: {{ item.vote_average }}</q-badge>
           <template v-slot:error>
             <img :src="getErrorImgUrl(errorImgUrl)" class="unnamed-img"/>
@@ -101,7 +101,11 @@ export default {
       return captions[props.itemType]
     }
 
-    return {showMore, isAllItems, displayedItems, getErrorImgUrl, getItemPosterImgUrl, getItemCaption}
+    const imgerr = (evt) => {
+      console.log(evt)
+    }
+
+    return {showMore, imgerr, isAllItems, displayedItems, getErrorImgUrl, getItemPosterImgUrl, getItemCaption}
   }
 }
 </script>
