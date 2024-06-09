@@ -16,17 +16,24 @@ firebase.initializeApp(firebaseConfig)
 const app = express()
 const HOSTNAME = 'localhost'
 const PORT = process.env.PORT ?? 3001
+const allowedOrigins = [
+  'http://localhost', // для разработки
+  'https://mir-kino.webfldev.ru'
+]
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || origin.startsWith('http://localhost:')) {
-      // Разрешить запросы без источника (например, при локальном запуске) или с localhost на любом порту
+    if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost')) {
+      // Разрешить запросы без источника или с localhost на любом порту или только https://mir-kino.webfldev.ru
       callback(null, true)
     } else {
       // Запретить все остальные запросы
       callback(new Error('Not allowed by CORS'))
     }
-  }
+  },
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+  credentials: true,
+  optionsSuccessStatus: 204
 }
 
 // Определение адреса сервера B в зависимости от режима
